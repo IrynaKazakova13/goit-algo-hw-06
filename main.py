@@ -1,6 +1,5 @@
 from collections import UserDict
 
-import re
 
 class Field: # Базовий клас для полів запису.
     def __init__(self, value):
@@ -11,17 +10,17 @@ class Field: # Базовий клас для полів запису.
 
 class Name(Field): # Клас для зберігання імені контакту. Обов'язкове поле
     def __init__(self, value):
-        self.value = value
+        super().__init__(value)  
 
 class Phone(Field): # Клас для зберігання номера телефону. Має валідацію формату (10 цифр).
     # Реалізовано валідацію номера телефону (має бути перевірка на 10 цифр).
     # Наслідує клас Field. Значення зберігaється в полі value .
     
     def __init__(self, value):
-
-        assert len(re.findall(r"\d", value)) == 10, f"Phone number {value} doest't have correct format: it must have 10 digits only"
-        self.value = value
-    
+        if not len(value) == 10 or not value.isdigit():
+            raise ValueError
+        super().__init__(value)     
+      
 class Record: # Клас для зберігання інформації про контакт, включаючи ім'я та список телефонів.
     
     # Реалізовано зберігання об'єкта Name в атрибуті name.
@@ -50,7 +49,10 @@ class Record: # Клас для зберігання інформації про
         if phone in [p.value for p in self.phones]:
             for p in self.phones:
                 if p.value == phone:
-                    p.value = new_phone
+                    if not len(new_phone) == 10 or not new_phone.isdigit():
+                        raise ValueError
+                    else:    
+                        p.value = new_phone
                     #print(f'Phone number {phone} for the contact of {self.name} changed into {new_phone}')
         else:
             raise ValueError            
@@ -107,7 +109,7 @@ book.add_record(john_record)
 #john_record.remove_phone("2222222222")
 #print(john_record)
 
-#john_record.edit_phone("1111111111", "333333333")
+#john_record.edit_phone("1111111111", "3333333333")
 #print(john_record)
 
 #john_record.remove_phone("2222222222")
@@ -141,12 +143,12 @@ print(book)
 
 # Знаходження та редагування телефону для John
 john = book.find("John")
-john.edit_phone("1111111111", "666666666")
+john.edit_phone("1111111111", "6666666666")
 
 print(john)  # Виведення: Contact name: John, phones: ........
 
 # Пошук конкретного телефону у записі John
-found_phone = john.find_phone("666666666")
+found_phone = john.find_phone("6666666666")
 print(f"{john.name}: {found_phone}")  # Виведення: John: ........
 
 # Видалення запису Jane
